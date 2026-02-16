@@ -6,9 +6,6 @@ use App\Filament\Resources\ArticleResource\Pages;
 use App\Models\Article;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
@@ -17,6 +14,8 @@ use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Form;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
@@ -29,7 +28,6 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
-use Filament\Forms\Components\SpatieTagsInput;
 
 class ArticleResource extends Resource implements HasShieldPermissions
 {
@@ -47,9 +45,10 @@ class ArticleResource extends Resource implements HasShieldPermissions
             ->schema([
                 Group::make()
                     ->schema([
-                        Section::make('Content')
+                        Section::make('Konten Kitab')
                             ->schema([
                                 TextInput::make('title')
+                                    ->label('Judul Latin')
                                     ->required()
                                     ->live(onBlur: true)
                                     ->afterStateUpdated(function (string $operation, $state, Set $set) {
@@ -59,13 +58,31 @@ class ArticleResource extends Resource implements HasShieldPermissions
                                         $set('slug', Str::slug($state));
                                     }),
 
+                                TextInput::make('arabic_title')
+                                    ->label('Judul Arab')
+                                    ->placeholder('مثال: مقدمة'),
+
                                 TextInput::make('slug')
                                     ->disabled()
                                     ->dehydrated()
                                     ->required()
                                     ->unique(Article::class, 'slug', ignoreRecord: true),
 
+                                TextInput::make('category')
+                                    ->label('Kategori')
+                                    ->placeholder('Contoh: Doa, Wirid, Al-Quran')
+                                    ->helperText('Kategori utama untuk grouping di Flutter app')
+                                    ->required(),
+
+                                TagsInput::make('tags')
+                                    ->label('Tags')
+                                    ->placeholder('Tambah tag...')
+                                    ->helperText('Contoh: Harian, Shubuh, Ramadhan')
+                                    ->separator(',')
+                                    ->reorderable(),
+
                                 RichEditor::make('content')
+                                    ->label('Konten / Bacaan')
                                     ->required()
                                     ->fileAttachmentsDirectory('articles')
                                     ->columnSpanFull(),
@@ -74,8 +91,10 @@ class ArticleResource extends Resource implements HasShieldPermissions
                         Section::make('SEO')
                             ->schema([
                                 TextInput::make('seo_title')
+                                    ->label('SEO Title')
                                     ->placeholder('Optional: Custom meta title'),
                                 Textarea::make('seo_description')
+                                    ->label('SEO Description')
                                     ->placeholder('Optional: Custom meta description')
                                     ->rows(2),
                             ])
@@ -89,30 +108,27 @@ class ArticleResource extends Resource implements HasShieldPermissions
                             ->schema([
                                 Toggle::make('is_featured')
                                     ->label('Featured Article')
-                                    ->helperText('Show this article on the homepage slider.'),
+                                    ->helperText('Tampilkan di homepage slider.'),
 
                                 DateTimePicker::make('published_at')
                                     ->label('Publish Date')
                                     ->default(now()),
-                                    
+
                                 Select::make('user_id')
                                     ->relationship('user', 'name')
                                     ->default(auth()->id())
                                     ->required()
-                                    ->searchable(),
+                                    ->searchable()
+                                    ->label('Author'),
                             ]),
 
                         Section::make('Media')
                             ->schema([
                                 FileUpload::make('thumbnail')
+                                    ->label('Thumbnail')
                                     ->image()
                                     ->directory('article-thumbnails')
                                     ->imageEditor(),
-                            ]),
-                        
-                        Section::make('Tags')
-                            ->schema([
-                                SpatieTagsInput::make('tags'),
                             ]),
                     ])
                     ->columnSpan(['lg' => 1]),
@@ -125,34 +141,48 @@ class ArticleResource extends Resource implements HasShieldPermissions
         return $table
             ->columns([
                 ImageColumn::make('thumbnail')
+                    ->label('Thumb')
                     ->square(),
-                
+
                 TextColumn::make('title')
+                    ->label('Judul')
                     ->searchable()
                     ->sortable()
                     ->limit(50)
-                    ->description(fn (Article $record) => Str::limit(strip_tags($record->content), 50)),
+                    ->description(fn (Article $record) => $record->arabic_title ?? 'No Arabic title')
+                    ->tooltip(fn (Article $record) => $record->arabic_title),
+
+                TextColumn::make('category')
+                    ->label('Kategori')
+                    ->badge()
+                    ->color('primary')
+                    ->sortable(),
+
+                TextColumn::make('tags')
+                    ->label('Tags')
+                    ->badge()
+                    ->separator(','),
 
                 TextColumn::make('published_at')
+                    ->label('Published')
                     ->dateTime()
                     ->sortable()
                     ->badge()
-                    ->color(fn ($state) => $state <= now() ? 'success' : 'warning')
-                    ->label('Published'),
+                    ->color(fn ($state) => $state <= now() ? 'success' : 'warning'),
 
                 IconColumn::make('is_featured')
-                    ->boolean()
-                    ->label('Featured'),
+                    ->label('Featured')
+                    ->boolean(),
 
                 TextColumn::make('user.name')
                     ->label('Author')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                
+
                 TextColumn::make('views_count')
+                    ->label('Views')
                     ->icon('heroicon-m-eye')
-                    ->sortable()
-                    ->label('Views'),
+                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\Filter::make('published')

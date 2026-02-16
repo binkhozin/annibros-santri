@@ -47,6 +47,19 @@ export default {
                 warning: '#F59E0B',
                 info: '#3B82F6',
             },
+            backdropBlur: {
+                xs: '2px',
+                sm: '4px',
+                md: '8px',
+                lg: '12px',
+                xl: '24px',
+            },
+            backdropSaturate: {
+                180: '180%',
+            },
+            fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+            },
         },
     },
     plugins: [

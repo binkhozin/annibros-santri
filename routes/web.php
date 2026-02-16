@@ -1,5 +1,4 @@
 <?php
-
 use App\Livewire\SuperDuper\BlogList;
 use App\Livewire\SuperDuper\BlogDetails;
 use App\Livewire\SuperDuper\Pages\ContactUs;
@@ -14,17 +13,15 @@ use Lab404\Impersonate\Services\ImpersonateManager;
 | Here is where you can register web routes for your application. These
 | routes are loaded by the RouteServiceProvider and all of them will
 | be assigned to the "web" middleware group. Make something great!
-|
 */
 
 Route::get('/', function () {
-    return view('components.superduper.pages.home');
+    return view('home');
 })->name('home');
 
 Route::get('/about-us', function () {
     return view('components.superduper.pages.about');
 })->name('about-us');
-
 
 Route::get('/blog', BlogList::class)->name('blog');
 
@@ -44,6 +41,10 @@ Route::get('/coming-soon', function () {
     return view('components.superduper.pages.coming-soon');
 })->name('coming-soon');
 
+Route::get('/asnawijaya2', function () {
+    return view('asnawijaya2');
+})->name('asnawijaya2');
+
 Route::post('/contact', [App\Http\Controllers\ContactController::class, 'submit'])
     ->name('contact.submit');
 
@@ -51,15 +52,10 @@ Route::get('impersonate/leave', function() {
     if(!app(ImpersonateManager::class)->isImpersonating()) {
         return redirect('/');
     }
-
     app(ImpersonateManager::class)->leave();
-
-    return redirect(
-        session()->pull('impersonate.back_to')
-    );
+    return redirect( session()->pull('impersonate.back_to') );
 })->name('impersonate.leave')->middleware('web');
 
 // SEO Routes
 Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 Route::get('/robots.txt', [App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');
-

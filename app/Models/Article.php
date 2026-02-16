@@ -17,9 +17,12 @@ class Article extends Model implements HasMedia
 
     protected $fillable = [
         'title',
+        'arabic_title',
         'slug',
+        'category',
         'thumbnail',
         'content',
+        'tags',
         'published_at',
         'is_featured',
         'views_count',
@@ -32,6 +35,7 @@ class Article extends Model implements HasMedia
         'published_at' => 'datetime',
         'is_featured' => 'boolean',
         'views_count' => 'integer',
+        'tags' => 'array', // Cast JSON to array
     ];
 
     public function user(): BelongsTo
