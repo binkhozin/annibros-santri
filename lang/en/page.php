@@ -95,4 +95,34 @@ return [
         ]
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | FCM Broadcast
+    |--------------------------------------------------------------------------
+    */
+    'fcm_broadcast' => [
+        'title' => 'Broadcast Notification',
+        'heading' => 'Broadcast Push Notification',
+        'subheading' => 'Send a push notification to jamaah via Firebase Cloud Messaging.',
+        'navigationLabel' => 'Broadcast Notification',
+        'fields' => [
+            'title' => 'Notification Title',
+            'body' => 'Message Body',
+            'target' => 'Target Recipient',
+        ],
+        'targets' => [
+            'semua_santri' => 'All Santri',
+            'wali_santri' => 'Wali Santri',
+        ],
+        'actions' => [
+            'send' => 'Send Notification',
+            'sending' => 'Sending...',
+        ],
+        'notifications' => [
+            'success_title' => 'Notification Sent!',
+            'success_body' => 'The push notification has been sent successfully.',
+            'error_title' => 'Failed to Send Notification',
+        ],
+    ],
+
 ];
